@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Dict, Optional
 
 from core.consumer import Consumer
-from core.service import Service, Status
+from core.service import Service, Status, Event
 
 
 class State:
@@ -33,11 +33,16 @@ class State:
         with open('state.dat', 'wb') as f:
             pickle.dump(data, f)
         self._logger.info('Saved state')
+        self._last_save = data['last_save']
 
-    def register_service(self, name: str, heartbeat_required: bool):
+    def add_consumer(self, consumer: Consumer):
+        self._logger.info(f'Registering {type(consumer)} as a consumer!')
+        self._consumers.append(consumer)
+
+    async def register_service(self, name: str, heartbeat_required: bool):
         if name in self._services:
             raise Exception('Service name already registered!')
-        self._services[name] = Service(name, datetime.fromtimestamp(0), Status.UNKNOWN, heartbeat_required, datetime.fromtimestamp(0))
+        self._services[name] = Service(name, datetime.fromtimestamp(0), Status.UNKNOWN, heartbeat_required, datetime.fromtimestamp(0), None)
         self._logger.info(f'Registered service {name}')
         self.save()
 
@@ -45,7 +50,15 @@ class State:
         if name not in self._services:
             raise Exception('Unknown service name!')
         last = self._services[name]
-        self._services[name] = Service(name, datetime.now(), status, last.heartbeat_required, datetime.now() if heartbeat else last.last_heartbeat)
+        self._services[name] = Service(name, datetime.now(), status, last.heartbeat_required, datetime.now() if heartbeat else last.last_heartbeat, None)
+        self._logger.debug(f'Updating service from {last} to {self._services[name]}')
+        await asyncio.gather(*[consumer.consume(self._services[name], last) for consumer in self._consumers])
+
+    async def publish_event(self, name: str, event: Event):
+        if name not in self._services:
+            raise Exception('Unknown service name!')
+        last = self._services[name]
+        self._services[name] = Service(name, datetime.now(), last.last_status, last.heartbeat_required, last.last_heartbeat, event)
         self._logger.debug(f'Updating service from {last} to {self._services[name]}')
         await asyncio.gather(*[consumer.consume(self._services[name], last) for consumer in self._consumers])
 

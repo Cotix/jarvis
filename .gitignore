@@ -1,0 +1,4 @@
+.env
+.env.save
+.idea/
+*__pycache__*

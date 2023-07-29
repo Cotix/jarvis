@@ -16,12 +16,13 @@ class Watchdog:
         self._state = state
 
     async def _check_service(self, service: Service):
-        if service.heartbeat_required:
+        if service.heartbeat_required and service.last_status != Status.DOWN:
             delta = (datetime.now() - service.last_heartbeat).total_seconds()
             if delta > self._settings.heartbeat_timeout:
                 await self._state.update_service(service.name, Status.DOWN, False)
 
     async def run(self):
+        self._logger.info(f'Starting watchdog')
         while True:
             for service in self._state.all_services():
                 await self._check_service(service)
