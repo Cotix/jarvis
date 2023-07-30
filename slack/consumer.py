@@ -14,7 +14,7 @@ class SlackStatusConsumer(Consumer):
         self._slack = slack
 
     async def consume(self, current: Service, last: Service):
-        channel = self._channels.get(current.name)
+        channel = self._channels.get(current.name, current.name)
         if current.last_status != last.last_status:
             msg = self._format_status_msg(current, last)
             if channel:
