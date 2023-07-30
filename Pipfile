@@ -9,6 +9,7 @@ coloredlogs = "*"
 fastapi = "*"
 uvicorn = "*"
 slack_sdk = "*"
+aiohttp = "*"
 
 [dev-packages]
 
