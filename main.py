@@ -1,4 +1,6 @@
 import asyncio
+import sys
+import signal
 
 from config import init_logging
 from core.endpoints.http_endpoint import HTTPEndpoint
@@ -6,7 +8,6 @@ from core.state import State
 from core.watchdog import Watchdog
 from slack.consumer import SlackStatusConsumer
 from slack.slack import Slack
-
 
 
 init_logging()

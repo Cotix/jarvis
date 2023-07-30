@@ -65,3 +65,4 @@ class HTTPEndpoint:
         config = Config(app=self._app, loop="asyncio")
         server = Server(config)
         await server.serve()
+        raise Exception("Uvicorn exited")
