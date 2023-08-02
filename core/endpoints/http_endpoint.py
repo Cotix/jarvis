@@ -19,7 +19,7 @@ class HttpEvent(BaseModel):
     source: str
     type: str
     service: str
-    fields: Dict[str, Union[str, int, bool]]
+    fields: Dict[str, Union[str, int, bool, float]]
 
 
 class HttpRegister(BaseModel):
