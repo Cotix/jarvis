@@ -18,7 +18,7 @@ class Watchdog:
 
     def __init__(self, state: State):
         self._state = state
-        self._scripts = dict
+        self._scripts = dict()
 
     async def _check_service(self, service: Service):
         if service.heartbeat_required and service.last_status != Status.DOWN:
