@@ -31,11 +31,10 @@ class Script:
         self._service = data['service']
 
     async def _execute(self, *arguments: str) -> dict:
-        process = await asyncio.create_subprocess_exec(self._executable_path, *arguments, stdout=subprocess.PIPE, stderr=asyncio.subprocess.PIPE, text=True)
+        process = await asyncio.create_subprocess_exec(self._executable_path, *arguments, stdout=subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-        result = subprocess.run((self._executable_path,) + arguments, stdout=subprocess.PIPE, text=True)
-        self._logger.info(f'Script {self._executable_path} returned: {result.stdout}')
-        return json.loads(result.stdout)
+        self._logger.info(f'Script {self._executable_path} returned: {stdout}')
+        return json.loads(stdout)
 
     async def push_events(self):
         if datetime.now() - self._last_run < self._interval:
@@ -49,6 +48,6 @@ class Script:
             self._logger.exception(f'Exception occured duing {self._executable_path}, possibly wrongly formatted output')
 
         self._last_run = datetime.now()
-        events = [Event(datetime.now(), f'Script {self._executable_path.split("/")[-1]}', data['type'], data['fields']) for x in data['events']]
+        events = [Event(datetime.now(), f'Script {self._executable_path.split("/")[-1]}', x['type'], x['fields']) for x in data['events']]
         for event in events:
             await self._state.publish_event(self._service, event)

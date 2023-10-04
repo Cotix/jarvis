@@ -2,3 +2,4 @@
 .env.save
 .idea/
 *__pycache__*
+state.dat

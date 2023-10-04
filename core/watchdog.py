@@ -26,18 +26,19 @@ class Watchdog:
             if delta > self._settings.heartbeat_timeout:
                 await self._state.update_service(service.name, Status.DOWN, False)
 
-    def _load_services(self):
+    async def _load_scripts(self):
         for root, dirs, files in os.walk(self._settings.scripts_path):
             for file in files:
                 file_path = os.path.join(root, file)
                 if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
                     self._logger.info(f'Found script: {file}')
                     script = Script(file, self._state)
-                    script.load()
+                    await script.load()
                     self._scripts.append(script)
 
     async def run(self):
         self._logger.info(f'Starting watchdog')
+        await self._load_scripts()
         while True:
             for service in self._state.all_services():
                 await self._check_service(service)
