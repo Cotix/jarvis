@@ -32,7 +32,9 @@ class Watchdog:
                 file_path = os.path.join(root, file)
                 if os.path.isfile(file_path) and os.access(file_path, os.X_OK):
                     self._logger.info(f'Found script: {file}')
-                    self._scripts.append(Script(file, self._state))
+                    script = Script(file, self._state)
+                    script.load()
+                    self._scripts.append(script)
 
     async def run(self):
         self._logger.info(f'Starting watchdog')
