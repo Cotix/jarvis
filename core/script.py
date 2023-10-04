@@ -48,6 +48,6 @@ class Script:
             self._logger.exception(f'Exception occured duing {self._executable_path}, possibly wrongly formatted output')
 
         self._last_run = datetime.now()
-        events = [Event(datetime.now(), f'Script {self._executable_path.split("/")[-1]}', data['type'], data['fields']) for x in data['events']]
+        events = [Event(datetime.now(), f'Script {self._executable_path.split("/")[-1]}', x['type'], x['fields']) for x in data['events']]
         for event in events:
             await self._state.publish_event(self._service, event)
