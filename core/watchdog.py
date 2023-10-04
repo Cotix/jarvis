@@ -43,7 +43,7 @@ class Watchdog:
             await self._load_scripts()
             for service in self._state.all_services():
                 await self._check_service(service)
-            await asyncio.gather(*[script.push_events() for script in self._scripts])
+            await asyncio.gather(*[script.push_events() for script in self._scripts.values()])
             if (datetime.now() - self._state.last_save).total_seconds() >= 60:
                 self._state.save()
             await asyncio.sleep(1)
