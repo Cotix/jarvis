@@ -24,6 +24,8 @@ class SlackStatusConsumer(Consumer):
         if current.event:
             msg = self._format_event_msg(current)
             await self._slack.post_message(channel, msg)
+            if current.event.type == 'TRADE' and abs(current.event.fields['pnl']) >= 2:
+                await self._slack.post_message('trades', msg)
 
     def _format_status_msg(self, current: Service, last: Service) -> str:
         return f'[{current.last_status}] {current.name} went from {last.last_status} to {current.last_status} at {current.last_check}!'
