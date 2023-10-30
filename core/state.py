@@ -14,6 +14,7 @@ class State:
     _services: Dict[str, Service]
     _consumers: List[Consumer]
     _last_save: datetime
+    _trades: List[Event]
 
     def __init__(self):
         self._services = {}
@@ -26,14 +27,31 @@ class State:
                 data = pickle.load(f)
             self._services.update(data.get('services', {}))
             self._last_save = data.get('last_save', datetime.now())
+            self._trades = data.get('trades', [])
             self._logger.info('Loaded state')
 
     def save(self):
-        data = {'services': self._services, 'last_save': datetime.now()}
+        data = {'services': self._services, 'last_save': datetime.now(), 'trades': self._trades}
         with open('state.dat', 'wb') as f:
             pickle.dump(data, f)
         self._logger.info('Saved state')
         self._last_save = data['last_save']
+
+    async def end_of_day(self):
+        if not self._trades:
+            return
+        with open('trades.csv', 'a') as f:
+            f.write('\n'.join([f'{t.timestamp.timestamp()},{t.source},{t.fields.get("pnl", 0)}' for t in self._trades]))
+
+        sources = set([t.source for t in self._trades])
+        pnls = {}
+        for source in sources:
+            pnls[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source == source)
+        with open('eod.csv', 'a') as f:
+            f.write('\n'.join([f'{datetime.now()},{pnls}' for t in self._trades]))
+
+        await asyncio.gather(*[consumer.end_of_day(pnls) for consumer in self._consumers])
+
 
     def add_consumer(self, consumer: Consumer):
         self._logger.info(f'Registering {type(consumer)} as a consumer!')
