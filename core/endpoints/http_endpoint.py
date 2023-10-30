@@ -43,7 +43,7 @@ class HTTPEndpoint:
         self._router.add_api_route("/publish/event", endpoint=self._publish_event, methods=["POST"])
         self._router.add_api_route("/publish/heartbeat/{service_name}", endpoint=self._publish_heartbeat, methods=["POST"])
         self._router.add_api_route("/register", endpoint=self._register_service, methods=["POST"])
-        self._router.add_api_route("/end_of_day", endpoint=self._register_service, methods=["POST"])
+        self._router.add_api_route("/end_of_day", endpoint=self._end_of_day, methods=["POST"])
         self._app.include_router(self._router)
 
     async def _publish_event(self, http_event: HttpEvent):
