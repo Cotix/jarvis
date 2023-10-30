@@ -27,6 +27,13 @@ class SlackStatusConsumer(Consumer):
             if current.event.type == 'TRADE' and abs(current.event.fields['pnl']) >= 2:
                 await self._slack.post_message('trades', msg)
 
+    async def end_of_day(self, pnls: Dict[str, float]):
+        msg = ['END OF DAY']
+        for source, pnl in pnls.items():
+            msg.append(f'{source}: ${pnl:.2f}')
+            await self._slack.post_message(self._channels.get(source, 'jarvis'), f'End of day: ${pnl:.2f}!')
+        await self._slack.post_message('general', '\n'.join(msg))
+
     def _format_status_msg(self, current: Service, last: Service) -> str:
         return f'[{current.last_status}] {current.name} went from {last.last_status} to {current.last_status} at {current.last_check}!'
 
