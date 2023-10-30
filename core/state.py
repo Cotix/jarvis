@@ -75,6 +75,8 @@ class State:
     async def publish_event(self, name: str, event: Event):
         if name not in self._services:
             raise Exception('Unknown service name!')
+        if event.type == 'TRADE':
+            self._trades.append(event)
         last = self._services[name]
         self._services[name] = Service(name, datetime.now(), last.last_status, last.heartbeat_required, last.last_heartbeat, event)
         self._logger.debug(f'Updating service from {last} to {self._services[name]}')
