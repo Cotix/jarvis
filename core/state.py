@@ -49,8 +49,9 @@ class State:
         for source in sources:
             pnls[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source.lower() == source)
         with open('eod.csv', 'a') as f:
-            f.write(f'{datetime.now()},{pnls}\n')
+            f.write(f'{datetime.now().timestamp()},{pnls}\n')
         self._trades = []
+        self.save()
         await asyncio.gather(*[consumer.end_of_day(pnls) for consumer in self._consumers])
 
 
