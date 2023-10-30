@@ -11,6 +11,7 @@ class SlackStatusConsumer(Consumer):
 
     def __init__(self, slack: Slack, channels: Dict[str, str]):
         self._channels = channels
+        self._channels.update({k.lower(): v for k, v in channels})
         self._slack = slack
 
     async def consume(self, current: Service, last: Service):
