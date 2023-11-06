@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-from core.service import Service
+from core.service import Service, EndOfDay
 
 
 class Consumer(ABC):
@@ -11,5 +11,5 @@ class Consumer(ABC):
         pass
 
     @abstractmethod
-    def end_of_day(self, pnls: Dict[str, float]):
+    def end_of_day(self, eod: Dict[str, EndOfDay]):
         pass

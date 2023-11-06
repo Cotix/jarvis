@@ -27,3 +27,7 @@ class Service(NamedTuple):
     last_heartbeat: datetime
     event: Optional[Event]
 
+
+class EndOfDay(NamedTuple):
+    pnl: float
+    value: float

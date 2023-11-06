@@ -1,7 +1,7 @@
 from typing import Dict
 
 from core.consumer import Consumer
-from core.service import Service, Status
+from core.service import Service, Status, EndOfDay
 from slack.slack import Slack
 
 
@@ -28,11 +28,11 @@ class SlackStatusConsumer(Consumer):
             if current.event.type == 'TRADE' and abs(current.event.fields['pnl']) >= 2:
                 await self._slack.post_message('trades', msg)
 
-    async def end_of_day(self, pnls: Dict[str, float]):
+    async def end_of_day(self, end_of_days: Dict[str, EndOfDay]):
         msg = ['END OF DAY']
-        for source, pnl in pnls.items():
-            msg.append(f'{source}: ${pnl:.2f}')
-            await self._slack.post_message(self._channels.get(source, 'jarvis'), f'End of day: ${pnl:.2f}!')
+        for source, end_of_day in end_of_days.items():
+            msg.append(f'{source} - pnl:${end_of_day.pnl:.2f} value: ${end_of_day.value:.2f}!')
+            await self._slack.post_message(self._channels.get(source.lower(), 'jarvis'), f'End of day - pnl:${end_of_day.pnl:.2f} value: ${end_of_day.value:.2f}!')
         await self._slack.post_message('general', '\n'.join(msg))
 
     def _format_status_msg(self, current: Service, last: Service) -> str:
