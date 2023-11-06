@@ -19,7 +19,7 @@ class SlackStatusConsumer(Consumer):
 
     async def consume(self, current: Service, last: Service):
         channel = self._channels.get(current.name, current.name)
-        if current.last_status != last.last_status and current.event.type not in BLACKLIST:
+        if current.last_status != last.last_status and (not current.event or current.event.type not in BLACKLIST):
             msg = self._format_status_msg(current, last)
             if channel:
                 await self._slack.post_message(channel, msg)
