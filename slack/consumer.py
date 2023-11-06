@@ -5,6 +5,9 @@ from core.service import Service, Status, EndOfDay
 from slack.slack import Slack
 
 
+BLACKLIST = {"VALUE"}
+
+
 class SlackStatusConsumer(Consumer):
     _channels: Dict[str, str]
     _slack: Slack
@@ -16,7 +19,7 @@ class SlackStatusConsumer(Consumer):
 
     async def consume(self, current: Service, last: Service):
         channel = self._channels.get(current.name, current.name)
-        if current.last_status != last.last_status:
+        if current.last_status != last.last_status and current.event.type not in BLACKLIST:
             msg = self._format_status_msg(current, last)
             if channel:
                 await self._slack.post_message(channel, msg)
