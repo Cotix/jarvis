@@ -61,7 +61,8 @@ class State:
 
     async def register_service(self, name: str, heartbeat_required: bool):
         if name in self._services:
-            raise Exception('Service name already registered!')
+            self._logger.info(f'Service name {name} already registered')
+            return
         self._services[name] = Service(name, datetime.fromtimestamp(0), Status.UNKNOWN, heartbeat_required, datetime.fromtimestamp(0), None)
         self._logger.info(f'Registered service {name}')
         self.save()
