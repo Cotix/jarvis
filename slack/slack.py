@@ -14,4 +14,4 @@ class Slack:
         self._client = AsyncWebClient(token=self._settings.slack_key)
 
     async def post_message(self, channel, message):
-        await self._client.chat_postMessage(channel=channel, text=message)
+        await self._client.chat_postMessage(channel=channel.lower(), text=message)

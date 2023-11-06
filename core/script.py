@@ -32,7 +32,7 @@ class Script:
 
     async def _execute(self, *arguments: str) -> dict:
         process = await asyncio.create_subprocess_exec(self._executable_path, *arguments, stdout=subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
+        stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=60)
         self._logger.info(f'Script {self._executable_path} returned: {stdout}')
         return json.loads(stdout)
 
