@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import List, Dict, Optional
 
 from core.consumer import Consumer
-from core.service import Service, Status, Event
+from core.service import Service, Status, Event, EndOfDay
 
 
 class State:
@@ -15,6 +15,7 @@ class State:
     _consumers: List[Consumer]
     _last_save: datetime
     _trades: List[Event]
+    _values: List[Event]
 
     def __init__(self):
         self._services = {}
@@ -28,32 +29,39 @@ class State:
             self._services.update(data.get('services', {}))
             self._last_save = data.get('last_save', datetime.now())
             self._trades = data.get('trades', [])
+            self._values = data.get('values', [])
             self._logger.info('Loaded state')
 
     def save(self):
-        data = {'services': self._services, 'last_save': datetime.now(), 'trades': self._trades}
+        data = {'services': self._services, 'last_save': datetime.now(), 'trades': self._trades, 'values': self._values}
         with open('state.dat', 'wb') as f:
             pickle.dump(data, f)
         self._logger.info('Saved state')
         self._last_save = data['last_save']
 
     async def end_of_day(self):
-        if not self._trades:
+        if not self._trades and not self._values:
             return
         with open('trades.csv', 'a') as f:
             f.write('\n'.join([f'{t.timestamp.timestamp()},{t.source},{t.fields.get("pnl", 0)}' for t in self._trades]))
             f.write('\n')
 
+        end_of_days = {}
+
         sources = set([t.source.lower() for t in self._trades])
         pnls = {}
         for source in sources:
             pnls[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source.lower() == source)
+            end_of_days[source] = EndOfDay(pnls[source], 0)
         with open('eod.csv', 'a') as f:
             f.write(f'{datetime.now().timestamp()},{pnls}\n')
+
+        for value in self._values:
+            end_of_days[value.source] = end_of_days.get(value.source, EndOfDay(0, 0))._replace(value=value.fields.get('value', 0))
+
         self._trades = []
         self.save()
-        await asyncio.gather(*[consumer.end_of_day(pnls) for consumer in self._consumers])
-
+        await asyncio.gather(*[consumer.end_of_day(end_of_days) for consumer in self._consumers])
 
     def add_consumer(self, consumer: Consumer):
         self._logger.info(f'Registering {type(consumer)} as a consumer!')
@@ -79,6 +87,8 @@ class State:
             raise Exception('Unknown service name!')
         if event.type == 'TRADE':
             self._trades.append(event)
+        if event.type == "VALUE":
+            self._values.append(event)
         last = self._services[name]
         self._services[name] = Service(name, datetime.now(), last.last_status, last.heartbeat_required, last.last_heartbeat, event)
         self._logger.debug(f'Updating service from {last} to {self._services[name]}')
