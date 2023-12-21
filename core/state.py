@@ -94,8 +94,8 @@ class State:
             raise Exception('Unknown service name!')
         if event.type == 'TRADE':
             self._trades.append(event)
-            self._pnl[event.source] = self._pnl.get(event.source, 0.0) + event.fields['pnl']
-            await asyncio.gather(*[consumer.pnl_update(name, self._pnl[event.source]) for consumer in self._consumers])
+            self._pnl[event.source.lower()] = self._pnl.get(event.source.lower(), 0.0) + event.fields['pnl']
+            await asyncio.gather(*[consumer.pnl_update(name, self._pnl[event.source.lower()]) for consumer in self._consumers])
         if event.type == "VALUE":
             self._values.append(event)
         last = self._services[name]

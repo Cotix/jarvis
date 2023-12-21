@@ -34,13 +34,20 @@ class WarroomConsumer(Consumer):
         self._clients = [x for x in self._clients if x != socket]
 
     async def consume(self, current: Service, last: Service):
-        pass
+        event = current.event
+        if event and event.type == 'TRADE':
+            msg = json.dumps({'type': 'trade', 'source': event.source, 'ts': event.timestamp, 'pnl': event.fields['pnl']})
+            self._send(msg)
 
     async def end_of_day(self, pnls: Dict[str, float]):
-        pass
+        msg = json.dumps({'type': 'eod', 'eod': pnls})
+        self._send(msg)
 
     async def pnl_update(self, name: str, pnl: float):
-        msg = json.dumps({'service': name, 'pnl': pnl})
+        msg = json.dumps({'type': 'pnl_update', 'service': name, 'pnl': pnl})
+        self._send(msg)
+
+    def _send(self, msg: str):
         to_remove = []
         for client in self._clients:
             try:
