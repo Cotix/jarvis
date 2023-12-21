@@ -33,13 +33,13 @@ class WarroomConsumer(Consumer):
             pass
         self._clients = [x for x in self._clients if x != socket]
 
-    def consume(self, current: Service, last: Service):
+    async def consume(self, current: Service, last: Service):
         pass
 
-    def end_of_day(self, pnls: Dict[str, float]):
+    async def end_of_day(self, pnls: Dict[str, float]):
         pass
 
-    def pnl_update(self, name: str, pnl: float):
+    async def pnl_update(self, name: str, pnl: float):
         msg = json.dumps({'service': name, 'pnl': pnl})
         to_remove = []
         for client in self._clients:
