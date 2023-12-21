@@ -16,10 +16,12 @@ class State:
     _last_save: datetime
     _trades: List[Event]
     _values: List[Event]
+    _pnl: Dict[str, float]
 
     def __init__(self):
         self._services = {}
         self._consumers = []
+        self._pnl = {}
         self._last_save = datetime.fromtimestamp(0)
 
     def load(self):
@@ -30,6 +32,10 @@ class State:
             self._last_save = data.get('last_save', datetime.now())
             self._trades = data.get('trades', [])
             self._values = data.get('values', [])
+            sources = set([t.source.lower() for t in self._trades])
+            self._pnl = {}
+            for source in sources:
+                self._pnl[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source.lower() == source)
             self._logger.info('Loaded state')
 
     def save(self):
@@ -88,6 +94,8 @@ class State:
             raise Exception('Unknown service name!')
         if event.type == 'TRADE':
             self._trades.append(event)
+            self._pnl[event.source] = self._pnl.get(event.source, 0.0) + event.fields['pnl']
+            await asyncio.gather(*[consumer.pnl_update(name, self._pnl[event.source]) for consumer in self._consumers])
         if event.type == "VALUE":
             self._values.append(event)
         last = self._services[name]

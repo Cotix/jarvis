@@ -8,7 +8,7 @@ from core.state import State
 from core.watchdog import Watchdog
 from slack.consumer import SlackStatusConsumer
 from slack.slack import Slack
-
+from warroom.consumer import WarroomConsumer
 
 init_logging()
 state = State()
@@ -19,6 +19,6 @@ http = HTTPEndpoint(state, loop)
 
 slack = SlackStatusConsumer(Slack(), {'liquidator': 'liquidator'})
 state.add_consumer(slack)
-
+state.add_consumer(WarroomConsumer())
 jobs = [watchdog.run(), http.run()]
 loop.run_until_complete(asyncio.gather(*jobs))

@@ -13,3 +13,6 @@ class Consumer(ABC):
     @abstractmethod
     def end_of_day(self, eod: Dict[str, EndOfDay]):
         pass
+
+    def pnl_update(self, name: str, pnl: float):
+        pass
