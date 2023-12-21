@@ -36,7 +36,7 @@ class WarroomConsumer(Consumer):
     async def consume(self, current: Service, last: Service):
         event = current.event
         if event and event.type == 'TRADE':
-            msg = json.dumps({'type': 'trade', 'source': event.source, 'ts': event.timestamp, 'pnl': event.fields['pnl']})
+            msg = json.dumps({'type': 'trade', 'source': event.source, 'pnl': event.fields['pnl']})
             self._send(msg)
 
     async def end_of_day(self, pnls: Dict[str, float]):
