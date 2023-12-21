@@ -66,6 +66,7 @@ class State:
             end_of_days[value.source] = end_of_days.get(value.source, EndOfDay(0, 0))._replace(value=value.fields.get('value', 0))
 
         self._trades = []
+        self._pnl = {}
         self.save()
         await asyncio.gather(*[consumer.end_of_day(end_of_days) for consumer in self._consumers])
 
