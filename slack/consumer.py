@@ -28,8 +28,12 @@ class SlackStatusConsumer(Consumer):
         if current.event and current.event.type not in BLACKLIST:
             msg = self._format_event_msg(current)
             await self._slack.post_message(channel, msg)
-            if current.event.type == 'TRADE' and abs(current.event.fields['pnl']) >= 2:
+            if current.event.type == 'TRADE' and abs(current.event.fields['pnl']) >= 2 and current.name.lower() != 'guus':
                 await self._slack.post_message('trades', msg)
+            if current.event.type == 'MISSED' and abs(current.event.fields['opportunity_pnl']) >= 5:
+                await self._slack.post_message('missed', msg)
+            if current.event.type == 'ERROR':
+                await self._slack.post_message('errors', msg)
 
     async def end_of_day(self, end_of_days: Dict[str, EndOfDay]):
         msg = ['END OF DAY']
