@@ -68,7 +68,7 @@ class HTTPEndpoint:
         await self._register_endpoints()
         config = Config(app=self._app, loop="asyncio")
         server = Server(config)
-        config2 = Config(app=self._app, loop="asyncio", host="10.8.0.1")
+        config2 = Config(app=self._app, loop="asyncio", host="10.8.0.1", port=7999)
         server2 = Server(config2)
         await asyncio.gather(server.serve(), server2.serve())
         raise Exception("Uvicorn exited")
