@@ -49,7 +49,7 @@ class State:
         if not self._trades and not self._values:
             return
         with open('trades.csv', 'a') as f:
-            f.write('\n'.join([f'{t.timestamp.timestamp()},{t.source},{t.fields.get("pnl", 0)}' for t in self._trades]))
+            f.write('\n'.join([f'{t.timestamp.timestamp()},{t.source},{t.fields.get("pnl", 0)},{t.fields.get("volume", 0)}' for t in self._trades]))
             f.write('\n')
 
         end_of_days = {}
