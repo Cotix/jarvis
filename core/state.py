@@ -39,7 +39,7 @@ class State:
             sources = set([t.source.lower() for t in self._trades])
             self._pnl = {}
             for source in sources:
-                self._pnl[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source.lower() == source)
+                self._pnl[source] = sum(float(t.fields.get('pnl', 0)) for t in self._trades if t.source.lower() == source)
             self._logger.info('Loaded state')
 
     def save(self):
