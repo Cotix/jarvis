@@ -61,7 +61,7 @@ class State:
         sources = set([t.source.lower() for t in self._trades])
         pnls = {}
         for source in sources:
-            pnls[source] = sum(t.fields.get('pnl', 0) for t in self._trades if t.source.lower() == source)
+            pnls[source] = sum(float(t.fields.get('pnl', 0)) for t in self._trades if t.source.lower() == source)
             end_of_days[source] = EndOfDay(pnls[source], 0)
         with open('eod.csv', 'a') as f:
             f.write(f'{datetime.now().timestamp()},{pnls}\n')
