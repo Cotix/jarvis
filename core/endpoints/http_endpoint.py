@@ -1,4 +1,5 @@
 import asyncio
+import json
 import threading
 from asyncio import AbstractEventLoop
 from datetime import datetime
@@ -44,6 +45,7 @@ class HTTPEndpoint:
         self._router.add_api_route("/publish/heartbeat/{service_name}", endpoint=self._publish_heartbeat, methods=["POST"])
         self._router.add_api_route("/register", endpoint=self._register_service, methods=["POST"])
         self._router.add_api_route("/end_of_day", endpoint=self._end_of_day, methods=["POST"])
+        self._router.add_api_route("/view/pnl", endpoint=self._pnl, methods=["GET"])
         self._app.include_router(self._router)
 
     async def _publish_event(self, http_event: HttpEvent):
@@ -63,6 +65,9 @@ class HTTPEndpoint:
 
     async def _end_of_day(self):
         self._main_loop.create_task(self._state.end_of_day())
+
+    async def _pnl(self):
+        return self._state._pnl
 
     async def run(self):
         await self._register_endpoints()
